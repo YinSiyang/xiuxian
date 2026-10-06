@@ -170,8 +170,9 @@
         .tab-btn.pve-tab.active { color: var(--accent-blue); background-color: rgba(14, 165, 233, 0.1); }
         .tab-btn.inv-tab.active { color: var(--accent-purple); background-color: rgba(147, 51, 234, 0.1); }
         
+        /* 修复移动端滚动问题的核心修改：将 flex 改为 block，允许自然上下滑动 */
         .tab-content { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; min-height: 0; }
-        .tab-content.active { display: flex; flex-direction: column; }
+        .tab-content.active { display: block; }
         
         .toolbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
         .multiplier-container { display: flex; gap: 5px; align-items: center; }
@@ -198,14 +199,15 @@
         .store-buy-btn { background-color: var(--danger-red); color: white; }
         .pve-btn { background-color: var(--accent-gold); color: #090d16; font-weight: bold; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
 
-        /* 暗黑系战斗竞技场：双向攻防、双血条与震动效果区 */
-        .combat-arena { background: #070a12; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+        /* 暗黑系战斗竞技场：修复移动端布局挤压重叠 */
+        .combat-arena { background: #070a12; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; display: flex; flex-direction: column; gap: 10px; }
         
         .battlefield-stage {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            height: 110px;
+            height: 100px;
+            padding: 0 15px;
             background: radial-gradient(circle, #131c2e 0%, #070a12 100%);
             border: 1px solid #334155;
             border-radius: 8px;
@@ -214,14 +216,14 @@
         }
 
         .combatant-box {
-            width: 80px; height: 80px; border-radius: 10px;
+            width: 70px; height: 70px; border-radius: 10px;
             background: #090d16;
             border: 2px solid #475569;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
             position: relative;
             box-shadow: 0 0 10px rgba(0,0,0,0.8);
-            transition: transform 0.15s ease-out;
+            flex-shrink: 0;
         }
 
         #heroBox { border-color: var(--accent-blue); }
@@ -234,31 +236,31 @@
             position: absolute;
             color: #ef4444;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             text-shadow: 0 0 8px rgba(239, 68, 68, 0.9), 1px 1px 2px black;
             pointer-events: none;
             animation: damageFloatUp 0.8s ease-out forwards;
             z-index: 20;
-            right: 45px;
-            top: 15px;
+            right: 35px;
+            top: 10px;
         }
 
         .hero-damage-popup {
             position: absolute;
             color: #f97316;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-shadow: 0 0 8px rgba(249, 115, 22, 0.9), 1px 1px 2px black;
             pointer-events: none;
             animation: damageFloatUp 0.8s ease-out forwards;
             z-index: 20;
-            left: 45px;
-            top: 15px;
+            left: 35px;
+            top: 10px;
         }
 
         @keyframes damageFloatUp {
             0% { opacity: 1; transform: translateY(0) scale(0.8); }
-            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-35px) scale(1.2); }
         }
 
         @keyframes avatarBreath {
@@ -709,7 +711,6 @@
             state.maxMonsterHp = Math.floor(estimatedDmg * typeMultiplier * rebirthFactor * realmFactor);
             state.currentMonsterHp = state.maxMonsterHp;
 
-            // 主角血量上限也同步按境界和转生等比放大
             state.maxHeroHp = Math.floor(1000 * realmFactor * (1 + state.cosmicShards * 0.5));
             state.currentHeroHp = state.maxHeroHp;
         }
@@ -991,12 +992,10 @@
             document.getElementById('spiritStonesDisplay').innerText = `灵石: ${formatNum(state.spiritStones)}`;
             document.getElementById('monsterNameDisplay').innerText = `遭遇：[${state.currentMonsterName}]`;
             
-            // 更新怪物血条与文字
             document.getElementById('monsterHpText').innerText = `HP: ${formatNum(state.currentMonsterHp)}/${formatNum(state.maxMonsterHp)}`;
             let hpPercent = Math.max(0, Math.min(100, (state.currentMonsterHp / state.maxMonsterHp) * 100));
             document.getElementById('monsterHpFill').style.width = `${hpPercent}%`;
 
-            // 更新主角血条与文字
             document.getElementById('heroHpText').innerText = `HP: ${formatNum(state.currentHeroHp)}/${formatNum(state.maxHeroHp)}`;
             let heroHpPercent = Math.max(0, Math.min(100, (state.currentHeroHp / state.maxHeroHp) * 100));
             document.getElementById('heroHpFill').style.width = `${heroHpPercent}%`;
@@ -1078,7 +1077,7 @@
             });
         }
 
-        // PVE 战斗循环（0.5攻速）：双向动态帧动画突进与双血条、飘字平滑扣除
+        // PVE 战斗循环（0.5攻速）
         setInterval(() => {
             if (!state.pveActive) return;
             
@@ -1089,19 +1088,18 @@
             let heroBox = document.getElementById('heroBox');
             let monsterBox = document.getElementById('monsterBox');
 
-            // 1. 主角攻击动作：主角向右突进，怪物震动
             playDynamicAnimation(heroBox, [
                 { transform: 'translateX(0)' },
-                { transform: 'translateX(45px) scale(1.08)' },
+                { transform: 'translateX(35px) scale(1.05)' },
                 { transform: 'translateX(0)' }
             ], 350);
 
             playDynamicAnimation(monsterBox, [
                 { transform: 'translate(0,0)' },
-                { transform: 'translate(-6px, 4px)' },
-                { transform: 'translate(6px, -5px)' },
-                { transform: 'translate(-5px, -4px)' },
-                { transform: 'translate(5px, 4px)' },
+                { transform: 'translate(-5px, 3px)' },
+                { transform: 'translate(5px, -4px)' },
+                { transform: 'translate(-4px, -3px)' },
+                { transform: 'translate(4px, 3px)' },
                 { transform: 'translate(0,0)' }
             ], 400);
 
@@ -1112,7 +1110,6 @@
 
             let logMsg = `[战斗] 主角斩击命中 ${state.currentMonsterName}，造成 <span style="color:var(--danger-red);">${formatNum(hitDamage)}</span> 点伤害！`;
 
-            // 2. 怪物反击动作（延迟）：怪物向左突进，主角震动，主角血量平滑扣除
             setTimeout(() => {
                 if (!state.pveActive) return;
                 let monsterDmg = Math.max(5, Math.floor(hitDamage * 0.25)); 
@@ -1121,20 +1118,19 @@
                 
                 playDynamicAnimation(monsterBox, [
                     { transform: 'translateX(0)' },
-                    { transform: 'translateX(-45px) scale(1.08)' },
+                    { transform: 'translateX(-35px) scale(1.05)' },
                     { transform: 'translateX(0)' }
                 ], 350);
 
                 playDynamicAnimation(heroBox, [
                     { transform: 'translate(0,0)' },
-                    { transform: 'translate(-6px, 4px)' },
-                    { transform: 'translate(6px, -5px)' },
-                    { transform: 'translate(-5px, -4px)' },
-                    { transform: 'translate(5px, 4px)' },
+                    { transform: 'translate(-5px, 3px)' },
+                    { transform: 'translate(5px, -4px)' },
+                    { transform: 'translate(-4px, -3px)' },
+                    { transform: 'translate(4px, 3px)' },
                     { transform: 'translate(0,0)' }
                 ], 400);
 
-                // 若主角血量见底，自动回满并记录日志
                 if (state.currentHeroHp <= 0) {
                     state.currentHeroHp = state.maxHeroHp;
                     state.lootLogs.unshift(`[重生] 主角真元受损，涅槃重生，血量已恢复！`);
