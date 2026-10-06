@@ -38,23 +38,24 @@
             100% { background-size: 100% 100%; filter: hue-rotate(0deg) saturate(0.9); }
         }
 
+        /* 修复顶部控件被手机刘海/灵动岛遮挡的问题 */
         #topControls {
-            position: absolute;
-            top: max(15px, env(safe-area-inset-top));
-            left: 15px; 
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            left: 12px; 
             right: auto;
-            z-index: 100;
+            z-index: 1000;
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         #langSwitcher, #soundToggle, #bgmToggle {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.95);
             color: var(--accent-gold);
             border: 1px solid var(--accent-gold);
             padding: 5px 10px;
             border-radius: 5px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
             cursor: pointer;
             backdrop-filter: blur(5px);
@@ -64,17 +65,36 @@
         }
 
         @media (max-width: 768px) {
-            body { flex-direction: column; animation: none; }
-            .cultivation-area { flex: 0 0 45% !important; height: 45%; border-right: none !important; border-bottom: 2px solid var(--accent-gold); padding-top: max(55px, env(safe-area-inset-top)); padding-bottom: 15px; justify-content: space-evenly !important; }
-            .right-panel { flex: 0 0 55% !important; height: 55%; }
+            body { 
+                flex-direction: column; 
+                overflow-y: auto; 
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+            .cultivation-area { 
+                flex: 0 0 auto !important; 
+                width: 100%;
+                min-height: 52vh;
+                border-right: none !important; 
+                border-bottom: 2px solid var(--accent-gold); 
+                padding-top: max(60px, env(safe-area-inset-top)) !important; 
+                padding-bottom: 20px; 
+                justify-content: center !important; 
+            }
+            .right-panel { 
+                flex: 0 0 auto !important; 
+                width: 100%;
+                min-height: 50vh;
+            }
             .meditate-container { width: 130px !important; height: 130px !important; transform: none !important; margin: 0 !important; }
             .meditate-btn { width: 120px !important; height: 120px !important; border-width: 3px !important; }
             .aura-spin { width: 140px !important; height: 140px !important; top: -5px !important; left: -5px !important; }
-            .anima-display { font-size: 2.2rem !important; margin: 0 !important; }
+            .anima-display { font-size: 2.2rem !important; margin: 10px 0 !important; }
             .realm-title { font-size: 1.2rem !important; }
-            .eps-display { font-size: 0.95rem !important; margin-bottom: 0 !important; }
-            .shards-display { font-size: 0.85rem !important; margin-bottom: 0 !important; }
-            .breakthrough-btn, .ascend-btn { margin-top: 0 !important; padding: 8px 16px !important; font-size: 0.95rem !important; }
+            .eps-display { font-size: 0.95rem !important; margin-bottom: 10px !important; }
+            .shards-display { font-size: 0.85rem !important; margin-bottom: 5px !important; }
+            .breakthrough-btn, .ascend-btn { margin-top: 5px !important; padding: 8px 16px !important; font-size: 0.95rem !important; }
             .card { flex-direction: column; align-items: stretch !important; gap: 10px; }
             .buy-btn { width: 100%; }
         }
@@ -170,7 +190,6 @@
         .tab-btn.pve-tab.active { color: var(--accent-blue); background-color: rgba(14, 165, 233, 0.1); }
         .tab-btn.inv-tab.active { color: var(--accent-purple); background-color: rgba(147, 51, 234, 0.1); }
         
-        /* 修复移动端滚动问题的核心修改：将 flex 改为 block，允许自然上下滑动 */
         .tab-content { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; min-height: 0; }
         .tab-content.active { display: block; }
         
@@ -199,14 +218,14 @@
         .store-buy-btn { background-color: var(--danger-red); color: white; }
         .pve-btn { background-color: var(--accent-gold); color: #090d16; font-weight: bold; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
 
-        /* 暗黑系战斗竞技场：修复移动端布局挤压重叠 */
+        /* 暗黑系战斗竞技场：修复移动端布局 */
         .combat-arena { background: #070a12; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; display: flex; flex-direction: column; gap: 10px; }
         
         .battlefield-stage {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 100px;
+            height: 95px;
             padding: 0 15px;
             background: radial-gradient(circle, #131c2e 0%, #070a12 100%);
             border: 1px solid #334155;
@@ -231,18 +250,17 @@
 
         .combatant-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 伤害飘字特效样式 */
         .battle-damage-popup {
             position: absolute;
             color: #ef4444;
             font-weight: bold;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             text-shadow: 0 0 8px rgba(239, 68, 68, 0.9), 1px 1px 2px black;
             pointer-events: none;
             animation: damageFloatUp 0.8s ease-out forwards;
             z-index: 20;
             right: 35px;
-            top: 10px;
+            top: 5px;
         }
 
         .hero-damage-popup {
@@ -255,7 +273,7 @@
             animation: damageFloatUp 0.8s ease-out forwards;
             z-index: 20;
             left: 35px;
-            top: 10px;
+            top: 5px;
         }
 
         @keyframes damageFloatUp {
@@ -268,12 +286,12 @@
             100% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.7); transform: scale(1.03); }
         }
 
-        .combat-info-row { width: 100%; display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; }
-        .boss-hp-bar { width: 100%; height: 9px; background: #1e293b; border-radius: 5px; overflow: hidden; border: 1px solid #475569; margin-bottom: 4px; }
+        .combat-info-row { width: 100%; display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; }
+        .boss-hp-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #475569; margin-bottom: 2px; }
         .boss-hp-fill { height: 100%; width: 100%; background: var(--danger-red); transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .hero-hp-fill { height: 100%; width: 100%; background: var(--accent-blue); transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .loot-log { background: #070a12; border: 1px solid #334155; border-radius: 8px; padding: 10px; height: 110px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; margin-bottom: 15px; }
+        .loot-log { background: #070a12; border: 1px solid #334155; border-radius: 8px; padding: 10px; height: 100px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; margin-bottom: 15px; }
         
         .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         .inv-item { background: #131c2e; border-width: 2px; border-style: solid; border-radius: 8px; padding: 10px; text-align: center; font-size: 0.9rem; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -717,7 +735,8 @@
 
         function updateBackground() {
             let currentBg = realmsConfig[state.realmIndex].bg;
-            document.body.style.backgroundImage = `linear-gradient(rgba(9, 13, 22, 0.8), rgba(9, 13, 22, 0.9)), url('${currentBg}')`;
+            // 修复手机端背景图丢失问题：在移动端和桌面端同步应用背景图样式
+            document.body.style.backgroundImage = `linear-gradient(rgba(9, 13, 22, 0.78), rgba(9, 13, 22, 0.88)), url('${currentBg}')`;
             let charImg = document.getElementById('meditateBtn');
             let heroImg = document.getElementById('heroAvatarImg');
             let charSrc = `character_${state.realmIndex + 1}.png`;
