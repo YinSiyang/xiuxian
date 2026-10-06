@@ -38,7 +38,6 @@
             100% { background-size: 100% 100%; filter: hue-rotate(0deg) saturate(0.9); }
         }
 
-        /* 修复顶部控件被手机刘海/灵动岛遮挡的问题 */
         #topControls {
             position: fixed;
             top: max(12px, env(safe-area-inset-top));
@@ -208,7 +207,7 @@
         .pve-card { border-left: 5px solid var(--accent-blue); flex-direction: column; align-items: stretch; gap: 10px; }
         
         .card-content-left { display: flex; align-items: center; gap: 15px; flex: 1; }
-        .facility-icon { width: 50px; height: 50px; border-radius: 8px; background-color: #0f172a; border: 2px solid #475569; object-fit: cover; }
+        .facility-icon { width: 50px; height: 50px; border-radius: 8px; background-color: #0f172a; border: 2px solid #475469; object-fit: cover; }
         .card-info h3 { margin: 0 0 5px 0; color: #f8fafc; font-size: 1.1rem; }
         .card-info p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
         
@@ -218,14 +217,14 @@
         .store-buy-btn { background-color: var(--danger-red); color: white; }
         .pve-btn { background-color: var(--accent-gold); color: #090d16; font-weight: bold; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
 
-        /* 暗黑系战斗竞技场：修复移动端布局 */
+        /* 暗黑系战斗竞技场 */
         .combat-arena { background: #070a12; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; display: flex; flex-direction: column; gap: 10px; }
         
         .battlefield-stage {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 95px;
+            height: 105px;
             padding: 0 15px;
             background: radial-gradient(circle, #131c2e 0%, #070a12 100%);
             border: 1px solid #334155;
@@ -235,13 +234,13 @@
         }
 
         .combatant-box {
-            width: 70px; height: 70px; border-radius: 10px;
+            width: 76px; height: 76px; border-radius: 10px;
             background: #090d16;
             border: 2px solid #475569;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            box-shadow: 0 0 12px rgba(0,0,0,0.9);
             flex-shrink: 0;
         }
 
@@ -413,7 +412,7 @@
                     <div style="font-size: 1.5rem; color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 10px var(--accent-gold);">VS</div>
                     <!-- 妖兽/BOSS立绘区 -->
                     <div class="combatant-box" id="monsterBox">
-                        <img id="monsterAvatarImg" src="" alt="Monster" onerror="this.style.display='none'">
+                        <img id="monsterAvatarImg" src="monster_1.png" alt="Monster" onerror="this.style.display='none'">
                     </div>
                 </div>
 
@@ -698,6 +697,7 @@
             { req: 1e33, mult: 5000, bg: 'bg_9_cosmic.jpg', stages: 1 }       
         ];
 
+        // 4种不同怪物的素材命名规范，对应 monster_1.png 到 boss_final.png
         const baseMonsterTemplates = [
             { name: "虚空畸变恶魔", avatar: "monster_1.png" },
             { name: "血月邪修", avatar: "monster_2.png" },
@@ -735,7 +735,6 @@
 
         function updateBackground() {
             let currentBg = realmsConfig[state.realmIndex].bg;
-            // 修复手机端背景图丢失问题：在移动端和桌面端同步应用背景图样式
             document.body.style.backgroundImage = `linear-gradient(rgba(9, 13, 22, 0.78), rgba(9, 13, 22, 0.88)), url('${currentBg}')`;
             let charImg = document.getElementById('meditateBtn');
             let heroImg = document.getElementById('heroAvatarImg');
@@ -1096,7 +1095,7 @@
             });
         }
 
-        // PVE 战斗循环（0.5攻速）
+        // PVE 战斗循环（0.5攻速）：完美同步攻击动画、伤害飘字与血条平滑扣血
         setInterval(() => {
             if (!state.pveActive) return;
             
@@ -1107,6 +1106,7 @@
             let heroBox = document.getElementById('heroBox');
             let monsterBox = document.getElementById('monsterBox');
 
+            // 1. 主角攻击动作与怪物血条平滑扣减同步触发
             playDynamicAnimation(heroBox, [
                 { transform: 'translateX(0)' },
                 { transform: 'translateX(35px) scale(1.05)' },
@@ -1126,14 +1126,21 @@
             state.currentMonsterHp -= hitDamage;
             playSound('hit');
             showMonsterDamagePopup(formatNum(hitDamage));
+            
+            // 立即刷新 UI 保证血条和数值动画完全同步
+            updatePveUI();
 
             let logMsg = `[战斗] 主角斩击命中 ${state.currentMonsterName}，造成 <span style="color:var(--danger-red);">${formatNum(hitDamage)}</span> 点伤害！`;
 
+            // 2. 怪物反击动作与主角真实血量平滑扣减同步触发
             setTimeout(() => {
                 if (!state.pveActive) return;
-                let monsterDmg = Math.max(5, Math.floor(hitDamage * 0.25)); 
+                let monsterDmg = Math.max(5, Math.floor(state.maxHeroHp * 0.06)); 
                 state.currentHeroHp = Math.max(0, state.currentHeroHp - monsterDmg);
                 showHeroDamagePopup(formatNum(monsterDmg));
+                
+                // 立即刷新 UI 保证主角血条同步扣血
+                updatePveUI();
                 
                 playDynamicAnimation(monsterBox, [
                     { transform: 'translateX(0)' },
@@ -1153,6 +1160,7 @@
                 if (state.currentHeroHp <= 0) {
                     state.currentHeroHp = state.maxHeroHp;
                     state.lootLogs.unshift(`[重生] 主角真元受损，涅槃重生，血量已恢复！`);
+                    updatePveUI();
                 }
             }, 900);
 
