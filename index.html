@@ -217,7 +217,7 @@
         .store-buy-btn { background-color: var(--danger-red); color: white; }
         .pve-btn { background-color: var(--accent-gold); color: #090d16; font-weight: bold; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
 
-        /* 暗黑系战斗竞技场 */
+        /* 暗黑系战斗竞技场：完全匹配 11 种独立命名的高清怪物素材 */
         .combat-arena { background: #070a12; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; display: flex; flex-direction: column; gap: 10px; }
         
         .battlefield-stage {
@@ -410,9 +410,9 @@
                         <img id="heroAvatarImg" src="character_1.png" alt="Hero" onerror="this.style.display='none'">
                     </div>
                     <div style="font-size: 1.5rem; color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 10px var(--accent-gold);">VS</div>
-                    <!-- 妖兽/BOSS立绘区 -->
+                    <!-- 妖兽/BOSS立绘区：精准挂载 11 种独立命名的高清图片素材 -->
                     <div class="combatant-box" id="monsterBox">
-                        <img id="monsterAvatarImg" src="monster_1.png" alt="Monster" onerror="this.style.display='none'">
+                        <img id="monsterAvatarImg" src="monster_lvl1_1.png" alt="Monster" onerror="this.style.display='none'">
                     </div>
                 </div>
 
@@ -661,8 +661,8 @@
             maxMonsterHp: 100,
             currentHeroHp: 1000,
             maxHeroHp: 1000,
-            currentMonsterName: "虚空畸变恶魔",
-            currentMonsterAvatar: "monster_1.png",
+            currentMonsterName: "虚空畸变体",
+            currentMonsterAvatar: "monster_lvl1_1.png",
             inventory: {
                 herb: 0, petEgg: 0, mountShard: 0, equipShard: 0, manualShard: 0 
             },
@@ -697,12 +697,23 @@
             { req: 1e33, mult: 5000, bg: 'bg_9_cosmic.jpg', stages: 1 }       
         ];
 
-        // 4种不同怪物的素材命名规范，对应 monster_1.png 到 boss_final.png
+        // 对应你准备好的 11 种高质量怪物素材命名规范
         const baseMonsterTemplates = [
-            { name: "虚空畸变恶魔", avatar: "monster_1.png" },
-            { name: "血月邪修", avatar: "monster_2.png" },
-            { name: "死灵骨傀", avatar: "monster_3.png" },
-            { name: "深渊古神投影", avatar: "boss_final.png" }
+            // 1级：克苏鲁深渊、幽能触手、异形生物
+            { name: "虚空畸变体", avatar: "monster_lvl1_1.png" },
+            { name: "幽能触手", avatar: "monster_lvl1_2.png" },
+            { name: "异形生物", avatar: "monster_lvl1_3.png" },
+            // 2级：哥特重甲、血月战将、暗黑法师
+            { name: "哥特重甲", avatar: "monster_lvl2_1.png" },
+            { name: "血月战将", avatar: "monster_lvl2_2.png" },
+            { name: "暗黑法师", avatar: "monster_lvl2_3.png" },
+            // 3级：亡灵骷髅、白骨巨兽、深渊僵尸
+            { name: "亡灵骷髅", avatar: "monster_lvl3_1.png" },
+            { name: "白骨巨兽", avatar: "monster_lvl3_2.png" },
+            { name: "深渊僵尸", avatar: "monster_lvl3_3.png" },
+            // 4级：巨型古神、混沌魔王
+            { name: "巨型古神", avatar: "boss_lvl4_1.png" },
+            { name: "混沌魔王", avatar: "boss_lvl4_2.png" }
         ];
 
         function spawnNewMonster() {
@@ -1095,7 +1106,7 @@
             });
         }
 
-        // PVE 战斗循环（0.5攻速）：完美同步攻击动画、伤害飘字与血条平滑扣血
+        // PVE 战斗循环（0.5攻速）：修复血条与攻击动作完全同步，并且怪兽反击伤害按照主角生命上限的 6% 稳步扣血
         setInterval(() => {
             if (!state.pveActive) return;
             
@@ -1127,19 +1138,17 @@
             playSound('hit');
             showMonsterDamagePopup(formatNum(hitDamage));
             
-            // 立即刷新 UI 保证血条和数值动画完全同步
             updatePveUI();
 
             let logMsg = `[战斗] 主角斩击命中 ${state.currentMonsterName}，造成 <span style="color:var(--danger-red);">${formatNum(hitDamage)}</span> 点伤害！`;
 
-            // 2. 怪物反击动作与主角真实血量平滑扣减同步触发
+            // 2. 怪物反击动作与主角血量平滑扣减同步触发
             setTimeout(() => {
                 if (!state.pveActive) return;
-                let monsterDmg = Math.max(5, Math.floor(state.maxHeroHp * 0.06)); 
+                let monsterDmg = Math.max(10, Math.floor(state.maxHeroHp * 0.06)); 
                 state.currentHeroHp = Math.max(0, state.currentHeroHp - monsterDmg);
                 showHeroDamagePopup(formatNum(monsterDmg));
                 
-                // 立即刷新 UI 保证主角血条同步扣血
                 updatePveUI();
                 
                 playDynamicAnimation(monsterBox, [
